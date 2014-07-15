@@ -268,8 +268,10 @@ task Push -depends Package {
 		& $package.OnPushScriptBlock
 	}
 	
+	$fileName = ("{0}\{1}.{2}.nupkg" -f $script:DeployFolder, $package.NuspecId, $script:AssemblyVersion)
+	WaitForFile($fileName)
 	
-	$args = @('push', ('"{0}.{1}.nupkg"' -f $package.NuspecId, $script:AssemblyVersion), ('"{0}"' -f $script:NugetDeployApiKey), '-s', ('"{0}"' -f $script:NugetDeployUrl))
+	$args = @('push', ('"{0}"' -f $fileName), '-s', ('"{0}"' -f $script:NugetDeployUrl), ('"{0}"' -f $script:NugetDeployApiKey) )
 	& "$script:NugetTask" $args | Write-Host
 }
 
