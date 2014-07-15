@@ -7,7 +7,7 @@ properties {
 	$VariablePrefix = "Cms"
 	$DevProduct = 'Cms'
 	$DevEnvironment = 'LOCAL'
-	$CompanyName = 'Cms'
+	$CompanyName = 'Robust Haven Inc'
 	
 	$RunInternalPackageDistribution = $false
 
