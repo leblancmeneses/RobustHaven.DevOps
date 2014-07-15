@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<PropertyGroup>
+		<RobustHavenTasksPath>$(MSBuildStartupDirectory)</RobustHavenTasksPath>
+	</PropertyGroup>
+	<Import Project="$(RobustHavenTasksPath)\RobustHaven.Tasks.Targets" />	
+	
+	<Target Name="BackupDatabase">
+		<Message Text="$(DatabaseName)" />
+				
+		<DBChangeManagement.MSBuildTask.MSSQLTask 
+			TaskConfiguration=".\MSSQLTask.config"
+			DatabaseName="$(DbPrefix)$(DatabaseName)"
+			Environment="$(DevEnvironment)"
+			ConnectionStringKey="dbhReader"
+			
+			IsBackupEnabled="true"
+			BackupLocation="$(BackupLocation)\$(DevEnvironment)"
+			
+			IsRestoreEnabled="false"
+			RestoreFile="$(MSBuildStartupDirectory)\NonExistant"
+			IsRestoreEnabledAndRestoreFileEmptyCreateNewDatabase="false"
+			
+			IsMigrationEnabled="false"
+			MigrationScriptLocation="$(MSBuildStartupDirectory)\NonExistant"
+			
+			VcsPath="$(VcsPath)"
+			Version="$(AssemblyVersion)"
+			
+			IsTransformationEnabled="false"
+			TransformationErrorFile=".\Error.log"
+		/>
+		
+		<_Sleep MillisecondsIn="5000" />
+		<ItemGroup>
+			<FixNaming Include="$(BackupLocation)\$(DevEnvironment)\SevenDaysStore\*.bak" />
+		</ItemGroup>
+		<Move SourceFiles="@(FixNaming)" DestinationFiles="@(FixNaming->'$(BackupLocation)\$(DevEnvironment)\$([System.Text.RegularExpressions.Regex]::Replace(%(Filename), '\d+-[a-zA-Z]+-\d+-\d+-\d+-$(DbPrefix)', ''))%(Extension)')" />
+	</Target>
+	
+	<UsingTask TaskName="_Sleep" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+		<ParameterGroup>
+			<MillisecondsIn ParameterType="System.Int32" Required="true" />
+		</ParameterGroup>
+		<Task>
+			<Code Type="Fragment" Language="cs">
+				<![CDATA[
+				System.Threading.Thread.Sleep(MillisecondsIn);
+				]]>
+			</Code>
+		</Task>
+	</UsingTask>
+</Project>

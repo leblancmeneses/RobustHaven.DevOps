@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+	<metadata>
+		<id>NServiceBusStart</id>
+		<title>NServiceBusStart</title>
+		<version>$version$</version>
+		<authors>Robust Haven Inc</authors>
+		<owners>Robust Haven Inc</owners>
+		<licenseUrl>http://www.robusthaven.com/</licenseUrl>
+		<projectUrl>http://www.robusthaven.com/</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>NServiceBusStart</description>
+	</metadata>
+	<files>
+		<file src="**\*.*" />
+	</files>
+</package>

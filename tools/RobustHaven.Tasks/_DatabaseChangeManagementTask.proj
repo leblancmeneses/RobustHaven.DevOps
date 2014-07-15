@@ -1,0 +1,74 @@
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<RobustHavenTasksPath>.</RobustHavenTasksPath>
+	</PropertyGroup>
+	<Import Project="$(RobustHavenTasksPath)\RobustHaven.Tasks.Targets"/>
+	
+	<Target Name="DoTask">
+		<ItemGroup>
+			<Params Include="BuildDirectory">
+				<Key>BuildDirectory</Key>
+				<Value>$(BuildDirectory)</Value>
+			</Params>
+			<Params Include="RootDirectory">
+				<Key>RootDirectory</Key>
+				<Value>$(RootDirectory)</Value>
+			</Params>
+						
+			<Params Include="DevProduct">
+				<Key>DevProduct</Key>
+				<Value>$(DevProduct)</Value>
+			</Params>
+			<Params Include="DevEnvironment">
+				<Key>DevEnvironment</Key>
+				<Value>$(DevEnvironment)</Value>
+			</Params>
+			<Params Include="DevBranch">
+				<Key>DevBranch</Key>
+				<Value>$(DevBranch)</Value>
+			</Params>
+			<Params Include="DevTask">
+				<Key>DevTask</Key>
+				<Value>$(DevTask)</Value>
+			</Params>
+			<Params Include="DevId">
+				<Key>DevId</Key>
+				<Value>$(DevId)</Value>
+			</Params>
+
+			<Params Include="IsInTeamBuild">
+				<Key>IsInTeamBuild</Key>
+				<Value>$(IsInTeamBuild)</Value>
+			</Params>
+			<Params Include="AssemblyVersion">
+				<Key>AssemblyVersion</Key>
+				<Value>$(AssemblyVersion)</Value>
+			</Params>
+		</ItemGroup>
+		
+		
+		<DBChangeManagement.MSBuildTask.MSSQLTask 
+			TaskConfiguration="$(TaskConfiguration)"
+			DatabaseName="$(PrefixedName)"
+			Environment="LOCAL"
+			ConnectionStringKey="DbChangeManagement"
+			
+			IsBackupEnabled="false"
+			BackupLocation="$(RootDirectory)\Databases\$(DatabaseName)"
+			
+			IsRestoreEnabled="$(IsDbRestoreEnabled)"
+			RestoreFile="$(RootDirectory)\Databases\$(DatabaseName).bak"
+			IsRestoreEnabledAndRestoreFileEmptyCreateNewDatabase="true"
+			
+			IsMigrationEnabled="true"
+			MigrationScriptLocation="$(RootDirectory)\Databases\$(DatabaseName)"
+			
+			VcsPath="$(VcsPath)" 
+			Version="$(AssemblyVersion)"
+			
+			IsTransformationEnabled="true"
+			TransformationAdditionalParameters="@(Params)"
+			TransformationErrorFile="$(TemporaryDirectory)\Error-DatabaseChangeManagement.log"
+		/>
+	</Target>
+</Project>

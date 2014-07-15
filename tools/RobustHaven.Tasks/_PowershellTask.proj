@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="VersionInfra" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<PropertyGroup>
+		<RobustHavenTasksPath>.</RobustHavenTasksPath>
+		<CS>Data Source=$(DbInstance);Initial Catalog=$(DbName);Integrated Security=True</CS>
+	</PropertyGroup>
+	<Import Project="$(RobustHavenTasksPath)\RobustHaven.Tasks.Targets" />	
+	
+	<Target Name="VersionInfra">	
+		<Message Text="$(CS)" />
+		<PowershellTask 
+			DbConnectionString="$(CS)"
+			Environment="$(DevEnvironment)"
+			Node="$(COMPUTERNAME)"
+			TagName="$(TagName)"
+			
+			IsMigrationEnabled="true"
+			MigrationScriptLocation="$(RootDirectory)\InfraScripts"
+
+			VcsPath="$(VcsPath)" 
+			Version="$(AssemblyVersion)" />
+	</Target>
+</Project>

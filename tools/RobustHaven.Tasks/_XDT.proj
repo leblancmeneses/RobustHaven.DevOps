@@ -1,0 +1,22 @@
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<RobustHavenTasksPath>.</RobustHavenTasksPath>
+	</PropertyGroup>
+	<Import Project="$(RobustHavenTasksPath)\RobustHaven.Tasks.Targets"/>
+	
+	<Target Name="DoTask">
+		<RobustHaven.Tasks.XdtTransform
+			SourceFile="$(SourceFile)"
+			TransformFile="$(TransformFile)"
+			DestinationFile="$(TemporaryDirectory)\xdt.output"
+			IsStackTraceEnabled="True"
+		/>
+		
+		<Copy
+			SourceFiles="$(TemporaryDirectory)\xdt.output"
+			DestinationFiles="$(SourceFile)"
+		/>
+		
+		<Delete Files="$(TemporaryDirectory)\xdt.output" />
+	</Target>
+</Project>

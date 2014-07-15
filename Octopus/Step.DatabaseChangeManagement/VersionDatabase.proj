@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="VersionDatabase" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<PropertyGroup>
+		<RobustHavenTasksPath>$(MSBuildStartupDirectory)</RobustHavenTasksPath>
+	</PropertyGroup>
+	<Import Project="$(RobustHavenTasksPath)\RobustHaven.Tasks.Targets" />	
+	
+	<Target Name="VersionDatabase">			
+		<ItemGroup>
+			<Params Include="BuildDirectory">
+				<Key>BuildDirectory</Key>
+				<Value>$(MSBuildStartupDirectory)\build</Value>
+			</Params>
+			<Params Include="RootDirectory">
+				<Key>RootDirectory</Key>
+				<Value>$(MSBuildStartupDirectory)</Value>
+			</Params>
+						
+			<Params Include="DevProduct">
+				<Key>DevProduct</Key>
+				<Value>$(DevProduct)</Value>
+			</Params>
+			<Params Include="DevEnvironment">
+				<Key>DevEnvironment</Key>
+				<Value>$(DevEnvironment)</Value>
+			</Params>
+			<Params Include="DevBranch">
+				<Key>DevBranch</Key>
+				<Value>$(DevBranch)</Value>
+			</Params>
+			<Params Include="DevTask">
+				<Key>DevTask</Key>
+				<Value>Deployment</Value>
+			</Params>
+			<Params Include="DevId">
+				<Key>DevId</Key>
+				<Value>OctopusDeploy</Value>
+			</Params>
+
+			<Params Include="IsInTeamBuild">
+				<Key>IsInTeamBuild</Key>
+				<Value>true</Value>
+			</Params>
+			<Params Include="AssemblyVersion">
+				<Key>AssemblyVersion</Key>
+				<Value>$(AssemblyVersion)</Value>
+			</Params>
+		</ItemGroup>
+			
+		<DBChangeManagement.MSBuildTask.MSSQLTask 
+			TaskConfiguration=".\MSSQLTask.config"
+			DatabaseName="$(DatabaseName)"
+			Environment="$(DevEnvironment)"
+			ConnectionStringKey="dbhReader"
+			
+			IsBackupEnabled="false"
+			BackupLocation="$(MSBuildStartupDirectory)\NonExistant"
+			
+			IsRestoreEnabled="false"
+			RestoreFile="$(MSBuildStartupDirectory)\NonExistant"
+			IsRestoreEnabledAndRestoreFileEmptyCreateNewDatabase="false"
+			
+			IsMigrationEnabled="true"
+			MigrationScriptLocation=".\Databases\$(DatabaseName)"
+			
+			VcsPath="$(VcsPath)" 
+			Version="$(AssemblyVersion)"
+			
+			IsTransformationEnabled="true"
+			TransformationErrorFile=".\Error.log"
+			TransformationAdditionalParameters="@(Params)"
+		/>
+	</Target>
+</Project>

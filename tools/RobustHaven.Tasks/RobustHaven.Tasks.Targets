@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<RobustHavenTasksPath Condition="'$(RobustHavenTasksPath)' == ''">$(MSBuildExtensionsPath)\RobustHavenTasks</RobustHavenTasksPath>
+	</PropertyGroup>
+
+	<UsingTask AssemblyFile="$(RobustHavenTasksPath)\RobustHaven.Tasks.dll" TaskName="FlexibleConfig.FlexibleConfigTask" />
+	<UsingTask AssemblyFile="$(RobustHavenTasksPath)\RobustHaven.Tasks.dll" TaskName="DBChangeManagement.MSBuildTask.MSSQLTask" />
+	<UsingTask AssemblyFile="$(RobustHavenTasksPath)\RobustHaven.Tasks.dll" TaskName="InfrastructureChangeManagement.MSBuildTask.PowershellTask" />
+	
+	<UsingTask AssemblyFile="$(RobustHavenTasksPath)\RobustHaven.Tasks.dll" TaskName="RobustHaven.Tasks.TFSExportTask"/>	
+	<UsingTask AssemblyFile="$(RobustHavenTasksPath)\RobustHaven.Tasks.dll" TaskName="RobustHaven.Tasks.FtpUpload" />
+	<UsingTask AssemblyFile="$(RobustHavenTasksPath)\RobustHaven.Tasks.dll" TaskName="RobustHaven.Tasks.GetAppSettingValue" />
+	<UsingTask AssemblyFile="$(RobustHavenTasksPath)\RobustHaven.Tasks.dll" TaskName="RobustHaven.Tasks.FindFilesOlderThan" />
+	<UsingTask AssemblyFile="$(RobustHavenTasksPath)\RobustHaven.Tasks.dll" TaskName="RobustHaven.Tasks.XdtTransform" />
+	
+</Project>
