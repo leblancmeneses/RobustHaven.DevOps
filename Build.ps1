@@ -19,7 +19,7 @@ properties {
 }
 
 . .\BuildExt.ps1
-Include ".\_init.ps1"
+Include "..\build\_init.ps1"
 
 
 Framework "4.0x86"
