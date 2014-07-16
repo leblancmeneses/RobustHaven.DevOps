@@ -210,7 +210,14 @@ function Generate-Nuspec
 			
 			foreach($dependency in $dependencies.packages.package)
 			{
-				$asmInfo += '			<dependency id="'+ $dependency.id +'" version="'+ $AssemblyVersion +'" />' + $nl
+				if( $dependency.GetAttribute("version") -eq '' )
+				{
+					$asmInfo += '			<dependency id="'+ $dependency.id +'" version="'+ $AssemblyVersion +'" />' + $nl
+				}
+				else
+				{
+					$asmInfo += '			<dependency id="'+ $dependency.id +'" version="'+ $dependency.version+'" />' + $nl
+				}
 			}
 		}
 		
