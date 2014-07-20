@@ -193,10 +193,6 @@ function Generate-Nuspec
 	
 		foreach($dependency in $dependencies.packages.package)
 		{
-			if($dependency.id -eq "RazorGenerator.Templating") {
-				continue;
-			}
-			
 			$asmInfo += '			<dependency id="'+ $dependency.id +'" version="'+ $dependency.version +'" />' + $nl
 		}
 		
