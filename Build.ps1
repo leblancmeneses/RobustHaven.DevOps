@@ -273,6 +273,9 @@ task Push -depends Package {
 	
 	$args = @('push', ('"{0}"' -f $fileName), '-s', ('"{0}"' -f $script:NugetDeployUrl), ('"{0}"' -f $script:NugetDeployApiKey) )
 	& "$script:NugetTask" $args | Write-Host
+	if (-not $?) {
+		throw "Error: Failed to push packages"
+	}
 }
 
 task Deploy -depends Push, Package { 
