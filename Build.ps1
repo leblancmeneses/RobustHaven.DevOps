@@ -238,9 +238,6 @@ task Package -depends Compile, Test {
 				-PackageConfig $package.PackageConfiguration `
 				-file $nuspecFileNameExpected
 		}
-		
-		
-		& $package.OnPackageScriptBlock
 
 		if(($package.ProjectType -ne [ProjectTypes]::XCopy) -and ($package.ProjectType -ne [ProjectTypes]::Library) -and ($package.ProjectType -ne [ProjectTypes]::None)) {  
 			cp ($script:DevOpsFolder + '\Octopus\OctopusDeployment.psm1') $package.BuildOutput 
@@ -253,6 +250,9 @@ task Package -depends Compile, Test {
 		if($package.ProjectType -eq [ProjectTypes]::WindowService) {
 			cp ($script:DevOpsFolder + '\Octopus\Step.WindowService\*.*') $package.BuildOutput 
 		}
+		
+		
+		& $package.OnPackageScriptBlock
 			
 		$args = @('pack', ('"{0}"' -f $nuspecFileNameExpected), '-OutputDirectory',  ('"{0}"' -f $script:DeployFolder), '-Version', ('"{0}"' -f $script:AssemblyVersion),  '-NoPackageAnalysis')
 		& "$script:NugetTask" $args | Write-Host
@@ -266,15 +266,15 @@ task Push -depends Package {
 	foreach ($package in $script:PackageItems)
 	{
 		& $package.OnPushScriptBlock
-	}
-	
-	$fileName = ("{0}\{1}.{2}.nupkg" -f $script:DeployFolder, $package.NuspecId, $script:AssemblyVersion)
-	WaitForFile($fileName)
-	
-	$args = @('push', ('"{0}"' -f $fileName), '-s', ('"{0}"' -f $script:NugetDeployUrl), ('"{0}"' -f $script:NugetDeployApiKey) )
-	& "$script:NugetTask" $args | Write-Host
-	if (-not $?) {
-		throw "Error: Failed to push packages"
+		
+		$fileName = ("{0}\{1}.{2}.nupkg" -f $script:DeployFolder, $package.NuspecId, $script:AssemblyVersion)
+		WaitForFile($fileName)
+		
+		$args = @('push', ('"{0}"' -f $fileName), '-s', ('"{0}"' -f $script:NugetDeployUrl), ('"{0}"' -f $script:NugetDeployApiKey) )
+		& "$script:NugetTask" $args | Write-Host
+		if (-not $?) {
+			throw "Error: Failed to push packages"
+		}
 	}
 }
 
