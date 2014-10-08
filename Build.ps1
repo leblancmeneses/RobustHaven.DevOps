@@ -243,15 +243,15 @@ task Package -depends Compile, Test {
 		& $package.OnPackageScriptBlock
 
 		if(($package.ProjectType -ne [ProjectTypes]::XCopy) -and ($package.ProjectType -ne [ProjectTypes]::Library) -and ($package.ProjectType -ne [ProjectTypes]::None)) {  
-			cp ($script:BuildFolder + '\Octopus\OctopusDeployment.psm1') $package.BuildOutput 
-			cp ($script:BuildFolder + '\Octopus\DeployFailed.ps1') $package.BuildOutput 
+			cp ($script:DevOpsFolder + '\Octopus\OctopusDeployment.psm1') $package.BuildOutput 
+			cp ($script:DevOpsFolder + '\Octopus\DeployFailed.ps1') $package.BuildOutput 
 		}
 
 		if($package.ProjectType -eq [ProjectTypes]::Website) {
-			cp ($script:BuildFolder + '\Octopus\Step.Www\*.*') $package.BuildOutput 
+			cp ($script:DevOpsFolder + '\Octopus\Step.Www\*.*') $package.BuildOutput 
 		}
 		if($package.ProjectType -eq [ProjectTypes]::WindowService) {
-			cp ($script:BuildFolder + '\Octopus\Step.WindowService\*.*') $package.BuildOutput 
+			cp ($script:DevOpsFolder + '\Octopus\Step.WindowService\*.*') $package.BuildOutput 
 		}
 			
 		$args = @('pack', ('"{0}"' -f $nuspecFileNameExpected), '-OutputDirectory',  ('"{0}"' -f $script:DeployFolder), '-Version', ('"{0}"' -f $script:AssemblyVersion),  '-NoPackageAnalysis')
