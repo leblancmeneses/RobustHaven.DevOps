@@ -62,55 +62,55 @@ function Touch-File()
 
 function New-PackageItem()
 {
-  param ([string]$SolutionName, [ProjectTypes]$ProjectType, [string]$SolutionFilePath, [string]$ConfigurationFileName, `
-  [string]$BuildOutput, [string]$RootFolder, `
-  $PackageXdts = @(),
-  [string]$NuspecId, [string]$NuspecTitle, [string]$NuspecAuthors, [string]$NuspecOwners, [string]$NuspecLicenseUrl, [string]$NuspecProjectUrl, [string]$NuspecDescription, [string]$PackageConfiguration = "", `
-  $OnPreInitScriptBlock = {}, $OnPackageScriptBlock = {},  $OnPushScriptBlock = {} )
+	param ([string]$SolutionName, [ProjectTypes]$ProjectType, [string]$SolutionFilePath, [string]$ConfigurationFileName, `
+	[string]$BuildOutput, [string]$RootFolder, `
+	$PackageXdts = @(),
+	[string]$NuspecId, [string]$NuspecTitle, [string]$NuspecAuthors, [string]$NuspecOwners, [string]$NuspecLicenseUrl, [string]$NuspecProjectUrl, [string]$NuspecDescription, [string]$PackageConfiguration = "", `
+	$OnPreInitScriptBlock = {}, $OnPackageScriptBlock = {},  $OnPushScriptBlock = {} )
 
-  return  @{            
-	SolutionName = $SolutionName
-	ProjectType = $ProjectType
-	SolutionFilePath = $SolutionFilePath
-	ConfigurationFileName = $ConfigurationFileName
-	BuildOutput = $BuildOutput
-	RootFolder = $RootFolder
-	PackageXdts = $PackageXdts
-	NuspecId = $NuspecId
-	NuspecTitle = $NuspecTitle
-	NuspecAuthors = $NuspecAuthors
-	NuspecOwners = $NuspecOwners
-	NuspecLicenseUrl = $NuspecLicenseUrl
-	NuspecProjectUrl = $NuspecProjectUrl
-	NuspecDescription = $NuspecDescription 
-	PackageConfiguration = $PackageConfiguration
-	OnPreInitScriptBlock = $OnPreInitScriptBlock
-	OnPackageScriptBlock = $OnPackageScriptBlock
-	OnPushScriptBlock = $OnPushScriptBlock
-  }  
+	return  @{            
+		SolutionName = $SolutionName
+		ProjectType = $ProjectType
+		SolutionFilePath = $SolutionFilePath
+		ConfigurationFileName = $ConfigurationFileName
+		BuildOutput = $BuildOutput
+		RootFolder = $RootFolder
+		PackageXdts = $PackageXdts
+		NuspecId = $NuspecId
+		NuspecTitle = $NuspecTitle
+		NuspecAuthors = $NuspecAuthors
+		NuspecOwners = $NuspecOwners
+		NuspecLicenseUrl = $NuspecLicenseUrl
+		NuspecProjectUrl = $NuspecProjectUrl
+		NuspecDescription = $NuspecDescription 
+		PackageConfiguration = $PackageConfiguration
+		OnPreInitScriptBlock = $OnPreInitScriptBlock
+		OnPackageScriptBlock = $OnPackageScriptBlock
+		OnPushScriptBlock = $OnPushScriptBlock
+	}  
 }
 
 
 function New-StagingEnvironment()
 {
-  param ([string]$EnvironmentName, [PackageTypes]$PackageType )
+	param ([string]$EnvironmentName, [PackageTypes]$PackageType )
 
-  return  @{            
-        EnvironmentName       = ($EnvironmentName.ToUpper())              
-        PackageType           = $PackageType         
-  }  
+	return  @{            
+		EnvironmentName       = ($EnvironmentName.ToUpper())              
+		PackageType           = $PackageType         
+	}  
 }
 
 
 
 function New-Database()
 {
-  param ([string]$DatabaseName, [string]$PrefixedName)
+	param ([string]$DatabaseName, [string]$PrefixedName)
 
-  return  @{            
-        DatabaseName       = $DatabaseName              
-        PrefixedName       = $PrefixedName         
-  }  
+	return  @{            
+		DatabaseName       = $DatabaseName              
+		PrefixedName       = $PrefixedName         
+	}  
 }
 
 function Generate-Assembly-Info
@@ -153,7 +153,7 @@ using System.Runtime.InteropServices;
 		Write-Host "Creating directory $dir"
 		[System.IO.Directory]::CreateDirectory($dir)
 	}
-	Write-Host "Generating assembly info file: $file"
+	Write-Host "Generate-Assembly-Info: $file"
 	Write-Output $asmInfo > $file
 }
 
@@ -238,7 +238,7 @@ function Generate-Nuspec
 		Write-Host "Creating directory $dir"
 		[System.IO.Directory]::CreateDirectory($dir)
 	}
-	Write-Host "Generating assembly info file: $file"
+	Write-Host "Generate-Nuspec: $file"
 	Write-Output $asmInfo > $file
 }
 
@@ -260,7 +260,7 @@ function Generate-EmptyXmlConfiguration
 		Write-Host "Creating directory $dir"
 		[System.IO.Directory]::CreateDirectory($dir)
 	}
-	Write-Host "Generating assembly info file: $file"
+	Write-Host "Generate-EmptyXmlConfiguration: $file"
 	Write-Output $asmInfo > $file
 }
 

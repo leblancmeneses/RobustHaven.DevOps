@@ -109,13 +109,13 @@ task Compile -depends Init {
 			$BuildOutput = $package.BuildOutput
 			$SolutionPath = $package.SolutionFilePath
 			if($SolutionPathCache -notcontains $SolutionPath){
-			exec {
-				msbuild $SolutionPath "/t:Clean;Rebuild" "/p:_PackageTempDir=$BuildOutput" `
-					"/p:Configuration=Release" "/p:DeployOnBuild=true" `
-					"/p:DeployTarget=PipelinePreDeployCopyAllFilesToOneFolder" `
-					"/p:AutoParameterizationWebConfigConnectionStrings=false" `
-					"/fl" "/flp:v=quiet"
-			}
+				exec {
+					msbuild $SolutionPath "/t:Clean;Rebuild" "/p:_PackageTempDir=$BuildOutput" `
+						"/p:Configuration=Release" "/p:DeployOnBuild=true" `
+						"/p:DeployTarget=PipelinePreDeployCopyAllFilesToOneFolder" `
+						"/p:AutoParameterizationWebConfigConnectionStrings=false" `
+						"/fl" "/flp:v=quiet"
+				}
 			}
 				
 			Remove-Item "$BuildOutput\*" -include .pdb -recurse
@@ -126,10 +126,10 @@ task Compile -depends Init {
 			$BuildOutput = $package.BuildOutput
 			$SolutionPath = $package.SolutionFilePath
 			if($SolutionPathCache -notcontains $SolutionPath){
-			exec {
-				msbuild $SolutionPath "/t:Clean;Rebuild" "/p:Configuration=Release"  `
-					"/fl" "/flp:v=quiet"
-			}
+				exec {
+					msbuild $SolutionPath "/t:Clean;Rebuild" "/p:Configuration=Release"  `
+						"/fl" "/flp:v=quiet"
+				}
 			}
 				
 			cp -rec ($package.RootFolder + '\bin\Release\*') $package.BuildOutput
@@ -141,10 +141,10 @@ task Compile -depends Init {
 			$BuildOutput = $package.BuildOutput
 			$SolutionPath = $package.SolutionFilePath
 			if($SolutionPathCache -notcontains $SolutionPath){
-			exec {
-				msbuild $SolutionPath "/t:Clean;Rebuild" "/p:Configuration=Release"  `
-					"/fl" "/flp:v=quiet"
-			}
+				exec {
+					msbuild $SolutionPath "/t:Clean;Rebuild" "/p:Configuration=Release"  `
+						"/fl" "/flp:v=quiet"
+				}
 			}
 				
 			cp -rec ($package.RootFolder + '\bin\Release\*') $package.BuildOutput
@@ -157,16 +157,16 @@ task Compile -depends Init {
 			$ReleaseFolder = $package.RootFolder + '\bin\Release'
 			$SolutionPath = $package.SolutionFilePath
 			if($SolutionPathCache -notcontains $SolutionPath){
-			exec {
-				msbuild $SolutionPath "/t:Clean;Rebuild" "/p:Configuration=Release" `
-					"/fl" "/flp:v=quiet"
-			}
+				exec {
+					msbuild $SolutionPath "/t:Clean;Rebuild" "/p:Configuration=Release" `
+						"/fl" "/flp:v=quiet"
+				}
 			}
 			Remove-Item "$ReleaseFolder\*" -include .pdb -recurse
 			
 			if( Test-Path "$ReleaseFolder\_PublishedWebsites" )
 			{
-			Remove-Item "$ReleaseFolder\_PublishedWebsites" -recurse
+				Remove-Item "$ReleaseFolder\_PublishedWebsites" -recurse
 			}
 			
 			cp -rec ($ReleaseFolder + '\*') $package.BuildOutput
@@ -206,12 +206,12 @@ task Compile -depends Init {
 					-DestinationFile $destinationConfigName `
 					-PackageConfigurationFileName $package.ConfigurationFileName `
 					-PackageXdts $package.PackageXdts 
-					}
-					}
+			}
+		}
 		
 		$SolutionPathCache += $package.SolutionFilePath
-				}
-				}
+	}
+}
 	
 
 task Test -depends Compile { 
@@ -309,31 +309,13 @@ task RunInitialSetup {
 
 task RunAfterUpdate -depends Init {
 
-	$DbChangeManagementConfig = $script:BuildFolder + '\Configuration\DbChangeManagement.config'
-	$tmpFile =  $script:TemporaryFolder + '\db.config'
-	
-	exec {
-		msbuild $script:FlexibleConfigTask "/t:DoTask" `
-			("/p:BuildDirectory={0}" -f $script:BuildFolder) `
-			("/p:RootDirectory={0}" -f $script:ProjectDirectoryRoot) `
-			("/p:TemporaryDirectory={0}" -f $script:TemporaryFolder) `
-			("/p:DevProduct={0}" -f $DevProduct) `
-			("/p:DevBranch={0}" -f $script:DevBranch) `
-			("/p:DevEnvironment={0}" -f $script:DevEnvironment) `
-			("/p:DevTask={0}" -f $script:DevTask) `
-			("/p:DevId={0}" -f  $script:DevId) `
-			("/p:IsInTeamBuild={0}" -f $IsInTeamBuild) `
-			("/p:AssemblyVersion={0}" -f $script:AssemblyVersion) `
-			("/p:SourceFile={0}" -f $DbChangeManagementConfig) `
-			("/p:DestinationFile={0}" -f $tmpFile) `
-			"/fl" `
-			("/flp:v=diag;logfile={0}\FlexibleConfigTask.log" -f $script:TemporaryFolder)
-	}
-		
-	foreach ($database in $script:Databases)
+	if($script:Databases.Count > 0)
 	{
+		$DbChangeManagementConfig = $script:BuildFolder + '\Configuration\DbChangeManagement.config'
+		$tmpFile =  $script:TemporaryFolder + '\db.config'
+		
 		exec {
-			msbuild $script:DatabaseChangeManagementTask "/t:DoTask" `
+			msbuild $script:FlexibleConfigTask "/t:DoTask" `
 				("/p:BuildDirectory={0}" -f $script:BuildFolder) `
 				("/p:RootDirectory={0}" -f $script:ProjectDirectoryRoot) `
 				("/p:TemporaryDirectory={0}" -f $script:TemporaryFolder) `
@@ -344,15 +326,35 @@ task RunAfterUpdate -depends Init {
 				("/p:DevId={0}" -f  $script:DevId) `
 				("/p:IsInTeamBuild={0}" -f $IsInTeamBuild) `
 				("/p:AssemblyVersion={0}" -f $script:AssemblyVersion) `
-				("/p:TaskConfiguration={0}" -f $tmpFile) `
-				("/p:PrefixedName={0}" -f $database.PrefixedName) `
-				("/p:DatabaseName={0}" -f $database.DatabaseName) `
-				("/p:IsDbRestoreEnabled={0}" -f $IsDbRestoreEnabled) `
-				("/p:VcsPath={0}" -f $script:VcsPath) `
+				("/p:SourceFile={0}" -f $DbChangeManagementConfig) `
+				("/p:DestinationFile={0}" -f $tmpFile) `
 				"/fl" `
-				("/flp:v=diag;logfile={0}\DatabaseChangeManagementTask.log" -f $script:TemporaryFolder)
+				("/flp:v=diag;logfile={0}\FlexibleConfigTask.log" -f $script:TemporaryFolder)
 		}
-			
+		
+		foreach ($database in $script:Databases)
+		{
+			exec {
+				msbuild $script:DatabaseChangeManagementTask "/t:DoTask" `
+					("/p:BuildDirectory={0}" -f $script:BuildFolder) `
+					("/p:RootDirectory={0}" -f $script:ProjectDirectoryRoot) `
+					("/p:TemporaryDirectory={0}" -f $script:TemporaryFolder) `
+					("/p:DevProduct={0}" -f $DevProduct) `
+					("/p:DevBranch={0}" -f $script:DevBranch) `
+					("/p:DevEnvironment={0}" -f $script:DevEnvironment) `
+					("/p:DevTask={0}" -f $script:DevTask) `
+					("/p:DevId={0}" -f  $script:DevId) `
+					("/p:IsInTeamBuild={0}" -f $IsInTeamBuild) `
+					("/p:AssemblyVersion={0}" -f $script:AssemblyVersion) `
+					("/p:TaskConfiguration={0}" -f $tmpFile) `
+					("/p:PrefixedName={0}" -f $database.PrefixedName) `
+					("/p:DatabaseName={0}" -f $database.DatabaseName) `
+					("/p:IsDbRestoreEnabled={0}" -f $IsDbRestoreEnabled) `
+					("/p:VcsPath={0}" -f $script:VcsPath) `
+					"/fl" `
+					("/flp:v=diag;logfile={0}\DatabaseChangeManagementTask.log" -f $script:TemporaryFolder)
+			}
+		}
 	}
 
 	remove-item -force -recurse $script:TemporaryFolder -ErrorAction SilentlyContinue 
