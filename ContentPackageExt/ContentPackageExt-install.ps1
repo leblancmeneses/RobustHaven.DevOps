@@ -6,8 +6,8 @@ Import-Module (Join-Path $toolsPath ContentPackageExt.psm1) -ArgumentList $insta
 # Request Commands
 Get-Command -Module ContentPackageExt
 
-# Remove default content folder
-removeDefaultContents
-
 # Add contents from tools folder
 addToolsContents
+
+# Remove default content folder
+removeDefaultContents

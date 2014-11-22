@@ -207,4 +207,4 @@ function addToolsContents()
     }
 }
 
-Export-ModuleMember removeDefaultContents, addToolsContents
+Export-ModuleMember addToolsContents, removeDefaultContents
