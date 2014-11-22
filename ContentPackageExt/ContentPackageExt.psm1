@@ -10,9 +10,14 @@ else
     $DebugPreference = "SilentlyContinue"
 }
 
+## Global Flags
+$DeleteFolderAllContentsAreSimilar = $true
+##
 
 $projectFile = new-object -typename System.IO.FileInfo -ArgumentList $project.FullName
 $projectDirectory = $projectFile.DirectoryName
+
+$defaultContentDirectory = Join-Path -path $installPath -childPath "content"
 
 
 function getPackageContentConfig($configFilePath = "packages.contentpackageext.config")
@@ -44,6 +49,43 @@ function getContentsToRemoved([xml] $configFile)
 	return $false;
 }
 
+# Deletes directory contents iff present in the source
+function DeleteDirectoryProjectItem ($projectItem, $relativePathTillNow)
+{
+    if($relativePathTillNow -eq $null)
+    {
+        $relativePathTillNow = $projectItem.Name
+    }
+    else
+    {
+        $relativePathTillNow = "$relativePathTillNow\$($projectItem.Name)"
+    }
+
+    foreach($subItem in $projectItem.ProjectItems)
+    {
+        $subItemSourcePath = Join-Path -Path $defaultContentDirectory -ChildPath "$relativePathTillNow\$($subItem.Name)"
+
+        if(Test-Path -Path $subItemSourcePath) 
+        {
+            if($subItem.ProjectItems -ne $null) 
+            {
+                DeleteDirectoryProjectItem $subItem $relativePathTillNow
+            }
+            else
+            {
+                $subItem.Delete()
+            }
+        }
+    }
+
+    $shouldDeleteProjectItem = $($DeleteFolderAllContentsAreSimilar -eq $true) -and $($projectItem.ProjectItems.Count -eq 0)
+
+    if( $shouldDeleteProjectItem ) 
+    {        
+        $projectItem.Delete()
+    }
+}
+
 function removeItemFromProject($projectItemName)
 {
    
@@ -53,8 +95,17 @@ function removeItemFromProject($projectItemName)
     
     if(Test-Path -Path $projectItemPath) 
     { 
-	    $project.ProjectItems.Item($projectItemName).Delete()
-	    #Remove-Item -Path $projectItemPath -Force -Recurse
+	    $projectItem = $project.ProjectItems.Item($projectItemName)
+
+        # if the project item is a directory/folder delete
+        if( $projectItem.ProjectItems -ne $null )
+        {
+            DeleteDirectoryProjectItem $projectItem
+        }
+        else
+        {
+            $projectItem.Delete()
+        }
     }
     else 
     {
@@ -107,7 +158,6 @@ function removeDefaultContents()
     {
         $contentsToBeRemoved = getContentsToRemoved($configFile)
     
-
         if($contentsToBeRemoved -ne $false) {
 	        removeContents($contentsToBeRemoved)
         }
@@ -207,4 +257,4 @@ function addToolsContents()
     }
 }
 
-Export-ModuleMember addToolsContents, removeDefaultContents
+Export-ModuleMember removeDefaultContents, addToolsContents
