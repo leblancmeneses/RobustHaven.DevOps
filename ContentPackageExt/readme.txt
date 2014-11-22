@@ -1,4 +1,4 @@
-packages.content.config
+packages.contentpackageext.config
 ===========================
 <?xml version="1.0" encoding="utf-8"?>
 <packages>
