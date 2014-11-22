@@ -193,7 +193,9 @@ function Generate-Nuspec
 	
 		foreach($dependency in $dependencies.packages.package)
 		{
-			$asmInfo += '			<dependency id="'+ $dependency.id +'" version="'+ $dependency.version +'" />' + $nl
+			if ($dependency -ne $null) {
+				$asmInfo += '			<dependency id="'+ $dependency.id +'" version="'+ $dependency.version +'" />' + $nl
+			}
 		}
 		
 		
@@ -206,13 +208,15 @@ function Generate-Nuspec
 			
 			foreach($dependency in $dependencies.packages.package)
 			{
-				if( $dependency.GetAttribute("version") -eq '' )
-				{
-					$asmInfo += '			<dependency id="'+ $dependency.id +'" version="'+ $AssemblyVersion +'" />' + $nl
-				}
-				else
-				{
-					$asmInfo += '			<dependency id="'+ $dependency.id +'" version="'+ $dependency.version+'" />' + $nl
+				if ($dependency -ne $null) {
+					if( $dependency.GetAttribute("version") -eq '' )
+					{
+						$asmInfo += '			<dependency id="'+ $dependency.id +'" version="'+ $AssemblyVersion +'" />' + $nl
+					}
+					else
+					{
+						$asmInfo += '			<dependency id="'+ $dependency.id +'" version="'+ $dependency.version+'" />' + $nl
+					}				
 				}
 			}
 		}
