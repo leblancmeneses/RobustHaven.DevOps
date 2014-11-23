@@ -142,10 +142,6 @@ function removeContents($contentsToBeRemoved)
 	}
 }
 
-# set the test page's custom tool to the razor generator
-$testPage = $project.ProjectItems.Item("SampleTemplate.cshtml")
-$testPage.Properties.Item("CustomTool").Value = "RazorGenerator"
-
 # For removing contents from contents folder
 function removeDefaultContents()
 {
@@ -232,6 +228,50 @@ function prepareContentsToBeAdded($currentPath, $relativePathTillNow="")
     }
 }
 
+function Get-ProjectItem($itemName, $parentItem)
+{
+    foreach($projectItem in $parentItem.ProjectItems) {
+        if($projectItem.Name -eq $itemName) 
+        {
+            return $projectItem
+        }
+    }
+    return $null
+}
+
+function AddDirectoryToProject ($path, $parentProject)
+{
+    $currentProjectItem = Get-ProjectItem $path.Name $parentProject
+    
+    if($currentProjectItem -eq $null) 
+    {
+        $parentProject.ProjectItems.AddFromDirectory($path.FullName)
+    }
+    else 
+    {
+        foreach($subItemPath in $(Get-ChildItem $path.FullName))
+        {
+            if(!$(isDirectory $subItemPath.FullName))
+            {        
+                $subProjectItem = $(Get-ProjectItem $subItemPath.Name $currentProjectItem)     
+                
+                if( $subProjectItem -eq $null )
+                {
+                    $currentProjectItem.ProjectItems.AddFromFileCopy($subItemPath.FullName)    
+                }
+                else 
+                {
+                    Write-debug "$($subItemPath.Name) already exists."
+                }
+            }
+            else 
+            {
+                AddDirectoryToProject $subItemPath $currentProjectItem                    
+            }  
+        }
+    }
+}
+
 function addToolsContents() 
 {
     $toolsContentPath = Join-Path -Path $toolsPath -ChildPath "content"
@@ -240,7 +280,8 @@ function addToolsContents()
     {
         PrepareContentsToBeAdded $toolsContentPath
 
-        if(Test-Path -Path $tempContentDirectory) {
+        if(Test-Path -Path $tempContentDirectory) 
+        {
             foreach($path in (Get-ChildItem $tempContentDirectory))
             {
                 if(!$(isDirectory $path.FullName))
@@ -249,7 +290,7 @@ function addToolsContents()
                 }
                 else 
                 {
-                    $project.ProjectItems.AddFromDirectory($path.FullName)
+                    AddDirectoryToProject $path $project                    
                 }
             }
             Remove-Item -Path $tempContentDirectory -Force -Recurse 
