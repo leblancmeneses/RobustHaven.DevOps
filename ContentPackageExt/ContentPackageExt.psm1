@@ -1,15 +1,5 @@
 param($installPath, $toolsPath, $package, $project,[switch] $debug)
 
-# using debug switch to set the log level
-if( $debug )
-{
-    $DebugPreference = "Continue"
-}
-else
-{
-    $DebugPreference = "SilentlyContinue"
-}
-
 ## Global Flags
 $DeleteFolderAllContentsAreSimilar = $true
 ##
@@ -19,8 +9,14 @@ $projectDirectory = $projectFile.DirectoryName
 
 $defaultContentDirectory = Join-Path -path $installPath -childPath "content"
 
+$contentDirectory = Join-Path -path $installPath -childPath "content"
+$toolsContentDirectory = Join-Path -path $toolsPath -childPath "content"
 
-function getPackageContentConfig($configFilePath = "packages.contentpackageext.config")
+$contentsSourceDirectories = @($contentDirectory, $toolsContentDirectory)
+
+$defaultConfigFileName = "packages.contentpackageext.config"
+
+function getPackageContentConfig($configFilePath = $defaultConfigFileName)
 {	
 	$configFilePath = Join-Path -path $projectDirectory -childPath $configFilePath
 	
@@ -34,48 +30,28 @@ function getPackageContentConfig($configFilePath = "packages.contentpackageext.c
     }
 }
 
-function getContentsToRemoved([xml] $configFile)
-{
-    foreach ($pkg in $configFile.Packages.ChildNodes) 
-	{
-		if($pkg.Id -eq $package.Id)
-		{
-			if($pkg.Action -eq "remove") {
-				Write-Debug "Some contents needs to be deleted from this package installation."                
-				return $pkg.Content;
-			}
-		}
-	}
-	return $false;
-}
-
 # Deletes directory contents iff present in the source
 function DeleteDirectoryProjectItem ($projectItem, $relativePathTillNow)
 {
-    if($relativePathTillNow -eq $null)
-    {
-        $relativePathTillNow = $projectItem.Name
-    }
-    else
-    {
-        $relativePathTillNow = "$relativePathTillNow\$($projectItem.Name)"
-    }
-
     foreach($subItem in $projectItem.ProjectItems)
     {
-        $subItemSourcePath = Join-Path -Path $defaultContentDirectory -ChildPath "$relativePathTillNow\$($subItem.Name)"
-
-        if(Test-Path -Path $subItemSourcePath) 
+        foreach($contentSourceDirectory in $contentsSourceDirectories)
         {
-            if($subItem.ProjectItems -ne $null) 
+            $subItemSourceDirectory = Join-Path -Path $contentSourceDirectory -ChildPath $relativePathTillNow
+            $subItemSourcePath = Join-Path -Path $subItemSourceDirectory -ChildPath $subItem.Name
+            
+            if(Test-Path -Path $subItemSourcePath) 
             {
-                DeleteDirectoryProjectItem $subItem $relativePathTillNow
+                if($subItem.ProjectItems -ne $null) 
+                {
+                    DeleteDirectoryProjectItem $subItem "$relativePathTillNow\$($subItem.Name)"
+                }
+                else
+                {
+                    $subItem.Delete()
+                }
             }
-            else
-            {
-                $subItem.Delete()
-            }
-        }
+       }
     }
 
     $shouldDeleteProjectItem = $($DeleteFolderAllContentsAreSimilar -eq $true) -and $($projectItem.ProjectItems.Count -eq 0)
@@ -86,25 +62,55 @@ function DeleteDirectoryProjectItem ($projectItem, $relativePathTillNow)
     }
 }
 
+function Get-ProjectItem($itemName, $parentItem)
+{
+    foreach($projectItem in $parentItem.ProjectItems) {
+        if($projectItem.Name -eq $itemName) 
+        {
+            return $projectItem
+        }
+    }
+    return $null
+}
+
+function Select-ProjectItemNode($item)
+{
+    $itemParts = $item.split("\")
+
+    $currentProjectNode = $project
+
+    foreach($itemPart in $itemParts)
+    {   
+        $currentProjectNode = Get-ProjectItem $itemPart $currentProjectNode
+        if($currentProjectNode -eq $null) 
+        {
+            return $null;
+        }
+    }
+
+    return $currentProjectNode
+}
+
 function removeItemFromProject($projectItemName)
 {
-   
-	Write-Debug "Removing $projectItemName ..."
-    
     $projectItemPath = Join-Path -Path $projectDirectory -ChildPath $projectItemName
     
     if(Test-Path -Path $projectItemPath) 
     { 
-	    $projectItem = $project.ProjectItems.Item($projectItemName)
-
-        # if the project item is a directory/folder delete
-        if( $projectItem.ProjectItems -ne $null )
+	    $projectItem = Select-ProjectItemNode $projectItemName
+        
+        # if the project items exists then delete operation
+        if($projectItem -ne $null)
         {
-            DeleteDirectoryProjectItem $projectItem
-        }
-        else
-        {
-            $projectItem.Delete()
+            # if the project item is a directory/folder delete
+            if( $projectItem.ProjectItems -ne $null )
+            {
+                DeleteDirectoryProjectItem $projectItem $projectItemName
+            }
+            else
+            {
+                $projectItem.Delete()
+            }
         }
     }
     else 
@@ -115,19 +121,21 @@ function removeItemFromProject($projectItemName)
 
 function removeAll()
 {
-	$packageContentDir = Join-Path -path $installPath -childPath "content"
-	$allFilesUnderContentDir = Get-ChildItem $packageContentDir
-	foreach($filePath in $allFilesUnderContentDir) 
-	{		
-		removeItemFromProject $filePath.Name
-	}
+    foreach($contentDir in $contentsSourceDirectories) 
+    {
+	    $allFilesUnderContentDir = Get-ChildItem $contentDir
+	    foreach($filePath in $allFilesUnderContentDir) 
+	    {
+		    removeItemFromProject $filePath.Name
+	    }
+    }
 }
 
 function removeSelected($contentsToBeRemoved) 
 {
-	foreach($content in $contentsToBeRemoved.split(";").trim()) 
+	foreach($content in $contentsToBeRemoved.split(";")) 
 	{
-		removeItemFromProject $content
+		removeItemFromProject $content.trim()
 	}
 }
 
@@ -148,15 +156,19 @@ function removeDefaultContents()
     $configFile = getPackageContentConfig
     if($configFile -eq $null) 
     {
-        Write-Host "WARN: packages.content.config file is missing; not running delete operation"
+        Write-Host "WARN: $defaultConfigFileName file is missing; not running delete operation"
     }
     else
     {
-        $contentsToBeRemoved = getContentsToRemoved($configFile)
-    
-        if($contentsToBeRemoved -ne $false) {
-	        removeContents($contentsToBeRemoved)
-        }
+        foreach ($pkg in $configFile.Packages.ChildNodes) 
+	    {
+		    if($pkg.Id -eq $package.Id)
+		    {
+			    if($pkg.Action -eq "remove") {
+				    removeContents $pkg.Content
+			    }
+		    }
+	    }
     }
 }	
 
@@ -165,7 +177,7 @@ function removeDefaultContents()
 $tempContentDirectory = $(Join-Path -Path $toolsPath -ChildPath "temp-contents")
 
 function isDirectory($path)
-{
+{  
      (Get-Item $path) -is [System.IO.DirectoryInfo]
 }
 
@@ -228,17 +240,6 @@ function prepareContentsToBeAdded($currentPath, $relativePathTillNow="")
     }
 }
 
-function Get-ProjectItem($itemName, $parentItem)
-{
-    foreach($projectItem in $parentItem.ProjectItems) {
-        if($projectItem.Name -eq $itemName) 
-        {
-            return $projectItem
-        }
-    }
-    return $null
-}
-
 function AddDirectoryToProject ($path, $parentProject)
 {
     $currentProjectItem = Get-ProjectItem $path.Name $parentProject
@@ -286,7 +287,7 @@ function addToolsContents()
             {
                 if(!$(isDirectory $path.FullName))
                 {
-                    $project.ProjectItems.AddFromFileCopy($path.FullName)
+                    $project.ProjectItems.AddFromFileCopy($path.FullName)                    
                 }
                 else 
                 {
