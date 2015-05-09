@@ -26,6 +26,13 @@ function Debug-Hashtable()
 	$table.GetEnumerator() | Sort-Object Name | ForEach-Object {"{0}`t{1}" -f $_.Name,($_.Value -join ",")} | Write-Host
 }
 
+function GetSettingXmlValue() {
+	param ([string]$settingFile, [string]$keyName)
+	[xml]$settings = Get-Content $settingFile
+	$node = (Select-Xml -Xml $settings -XPath ("//BuildSettings/add[@key='{0}']" -f $keyName)).Node
+	return $node.value;
+}
+
 function WaitForFile() {
 	param ([string]$file)
   
