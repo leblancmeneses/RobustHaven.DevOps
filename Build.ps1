@@ -270,11 +270,12 @@ task Push -depends Package {
 		$fileName = ("{0}\{1}.{2}.nupkg" -f $script:DeployFolder, $package.NuspecId, $script:AssemblyVersion)
 		WaitForFile($fileName)
 		
-		$args = @('push', ('"{0}"' -f $fileName), '-s', ('"{0}"' -f $script:NugetDeployUrl), ('"{0}"' -f $script:NugetDeployApiKey) )
-		& "$script:NugetTask" $args | Write-Host
-		if (-not $?) {
-			throw "Error: Failed to push packages"
-		}
+		Retry-Command -cmd {
+			$args = @('push', ('"{0}"' -f $fileName), '-s', ('"{0}"' -f $script:NugetDeployUrl), ('"{0}"' -f $script:NugetDeployApiKey) )
+			& "$script:NugetTask" $args | Write-Host
+		} `
+		-errorMessage ('Error pushing nuget package: {0}' -f $fileName) `
+		-retries 15 -secondsDelay 45
 	}
 }
 

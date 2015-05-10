@@ -67,6 +67,35 @@ function Touch-File()
     }
 }
 
+function Retry-Command
+{
+    param (
+		[Parameter(Mandatory=$true)][scriptblock]$cmd, 
+        [Parameter(Mandatory=$true)][string]$errorMessage,
+		[Parameter(Mandatory=$false)][int]$retries = 5, 
+		[Parameter(Mandatory=$false)][int]$secondsDelay = 2
+    )
+    
+    $retrycount = 0
+    $completed = $false
+ 
+    while (-not $completed) {
+        try {
+			exec $cmd $errorMessage
+            $completed = $true
+        } catch {
+            if ($retrycount -ge $retries) {
+                Write-Verbose ("Failed the maximum number of {0} times." -f $retrycount)
+                throw
+            } else {
+                Write-Verbose ("Retrying in {0} seconds." -f $secondsDelay)
+                Start-Sleep $secondsDelay
+                $retrycount++
+            }
+        }
+    }
+}
+
 function New-PackageItem()
 {
 	param ([string]$SolutionName, [ProjectTypes]$ProjectType, [string]$SolutionFilePath, [string]$ConfigurationFileName, `
